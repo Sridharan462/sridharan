@@ -1,46 +1,44 @@
 const express=require('express')
 const path = require('path')
 const router=express.Router() 
-const mysql=require('mysql') 
+const db=require('mysql') 
 const app=express()
-const PORT=process.env.PORT ||9000;
+const PORT=8000;
 app.use(express.json());
-app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 const fs = require("fs");
 const csv = require("fast-csv");
 var temp=0;
 global.__basedir = __dirname + "/..";
-var con = mysql.createConnection({  
+var connection = db.createConnection({  
   host: "localhost",  
   user: "root",  
   password: "password",
-  database:"csvdb"
+  database:"csvdatabase"
 });  
-con.connect(function(err) {  
+connection.connect(function(err) {  
   if (err) throw err;  
-  console.log("Connected!");  
+  console.log("Connected to MySQL Datebase");  
 });  
 router.post('/',function(req,res)
 {
   if (req.body.file.length>=1){
-    let path1 =  __dirname+"\\"+req.body.file.split('\\')[2];
-    fs.createReadStream(path1)
+    let file_path =  __dirname+"\\"+req.body.file.split('\\')[2];
+    fs.createReadStream(file_path)
       .pipe(csv.parse({ headers: true }))
       .on("error", (error) => {
         throw error.message;
       })
       
-      .on("data", (row) => {
-        const keys = Object.keys(row);
+      .on("data", (r) => {
+        const keys = Object.keys(r);
         if (temp==0)
         {
           console.log(keys[0],keys[1]);
           var sql = "create table if not exists csv_datatable(Game_Number varchar(150),Game_Length varchar(150))";
           con.query(sql,function (err, result) {
             if (err) throw err;
-            // console.log("Number of records inserted: " + result.affectedRows);
           });
           temp=1;
         }
@@ -49,7 +47,6 @@ router.post('/',function(req,res)
           var sql="insert into csv_datatable values (?,?)"
           con.query(sql,[row[keys[0]],row[keys[1]]],function (err, result) {
             if (err) throw err;
-            // console.log("Number of records inserted: " + result.affectedRows);
           });
         }
       })
