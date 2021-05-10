@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import MaterialTable from 'material-table';
 import './App.css';
-var content=[]
 function App(){
-    const [file,setFile]=useState('')
+    var file_content=[]
+    const [File,setFile]=useState('')
     useEffect(()=>{
     fetch("/",{
       method:'post',
@@ -12,14 +12,12 @@ function App(){
         "Content-Type":"application/json"
       },
       body:JSON.stringify({
-        file,
+        File,
       })
     })
     .then(res=>res.json())
     .then(result=>{
-      console.log(result)
-      content=result
-      console.log(content)
+      file_content=result
     })
     })
   return (
@@ -28,10 +26,9 @@ function App(){
         <label>
           Select the CSV File 
         </label>
-        <input type="file" value={file} onChange={(event)=>setFile(event.target.value)}/>
+        <input type="file" value={File} onChange={(e)=>setFile(e.target.value)}/>
         <button>Submit</button>
-        {content.map(d=><li key={d.Game_Number}>{d}</li>)}
-        <h4>Heloo</h4>
+        {content.map(data=><li key={data.Game_Number}>{data}</li>)}
       </header>
     </div>
   );
